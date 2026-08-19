@@ -43,13 +43,17 @@ func (s ParcelStore) Get(number int) (Parcel, error) {
 	return p, nil
 }
 
-func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
+func (s ParcelStore) GetByClient(client int) (parcel []Parcel, err error) {
 	rows, err := s.db.Query("SELECT number, client, status, address, created_at FROM parcel WHERE client = :client",
 		sql.Named("client", client))
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err = rows.Close(); err != nil {
+			parcel = nil
+		}
+	}()
 
 	var res []Parcel
 	for rows.Next() {
