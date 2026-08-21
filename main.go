@@ -102,7 +102,11 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	store := NewParcelStore(db)
 	service := NewParcelService(store)
